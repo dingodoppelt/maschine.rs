@@ -88,7 +88,7 @@ fn usage(prog_name: &String) {
     println!("usage: {} <hidraw device>", prog_name);
 }
 
-const PAD_RELEASED_BRIGHTNESS: f32 = 0.015;
+const PAD_RELEASED_BRIGHTNESS: f32 = 0.0;
 
 #[allow(dead_code)]
 enum PressureShape {
@@ -203,6 +203,7 @@ impl<'a> MHandler<'a> {
             PressureShape::Exponential(power) => pressure.powf(power),
             PressureShape::Constant(c_pressure) => c_pressure
         } * 127.0) as U7
+        println!(pressure);
     }
 
     #[allow(dead_code)]
@@ -340,7 +341,7 @@ impl<'a> MaschineHandler for MHandler<'a> {
             return
         }
 
-        let midi_note = maschine.get_midi_note_base() + PAD_NOTE_MAP[pad_idx];
+        let midi_note = PAD_NOTE_MAP[pad_idx];
         let msg = Message::PolyphonicPressure(Ch16, midi_note,
                                               self.pressure_to_vel(pressure));
 
@@ -406,8 +407,8 @@ fn main() {
         seq_port: &seq_port,
         seq_handle: &seq_handle,
 
-        pressure_shape: PressureShape::Exponential(1.6),
-        send_aftertouch: false,
+        pressure_shape: PressureShape::Linear,
+        send_aftertouch: true,
 
         osc_socket: &osc_socket,
         osc_outgoing_addr: SocketAddr::V4(
