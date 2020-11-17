@@ -19,8 +19,8 @@ use std::collections::VecDeque;
 use std::cmp::Ordering::Equal;
 
 // XXX: need smarter debouncing
-const THRESHOLD: f32 = 32.0 / 4096.0;
-const MEDIAN_KERNEL_LENGTH: usize = 15;
+const THRESHOLD: f32 = 32.0 / 8192.0;
+const MEDIAN_KERNEL_LENGTH: usize = 5;
 
 #[derive(Copy, Clone, Debug)]
 enum MaschinePadState {

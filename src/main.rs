@@ -313,21 +313,21 @@ impl<'a> MHandler<'a> {
 }
 
 const PAD_NOTE_MAP: [U7; 16] = [
-    12, 13, 14, 15,
-     8,  9, 10, 11,
-     4,  5,  6,  7,
-     0,  1,  2,  3
+    56, 61, 62, 64,
+     60, 58, 63, 65,
+     37, 40, 49, 55,
+     39, 43, 50, 53
 ];
 
 impl<'a> MaschineHandler for MHandler<'a> {
     fn pad_pressed(&mut self, maschine: &mut dyn Maschine, pad_idx: usize, pressure: f32) {
-        let midi_note = maschine.get_midi_note_base() + PAD_NOTE_MAP[pad_idx];
-        let msg = Message::NoteOn(Ch1, midi_note, self.pressure_to_vel(pressure));
+        let midi_note = PAD_NOTE_MAP[pad_idx];
+        let msg = Message::NoteOn(Ch16, midi_note, self.pressure_to_vel(pressure));
 
         self.seq_port.send_message(&msg).unwrap();
         self.seq_handle.drain_output();
 
-        maschine.set_pad_light(pad_idx, self.pad_color(), pressure.sqrt());
+        maschine.set_pad_light(pad_idx, self.pad_color(), pressure.sqrt().powf(2.0));
     }
 
     fn pad_aftertouch(&mut self, maschine: &mut dyn Maschine, pad_idx: usize, pressure: f32) {
@@ -341,7 +341,7 @@ impl<'a> MaschineHandler for MHandler<'a> {
         }
 
         let midi_note = maschine.get_midi_note_base() + PAD_NOTE_MAP[pad_idx];
-        let msg = Message::PolyphonicPressure(Ch1, midi_note,
+        let msg = Message::PolyphonicPressure(Ch16, midi_note,
                                               self.pressure_to_vel(pressure));
 
         self.seq_port.send_message(&msg).unwrap();
@@ -351,8 +351,8 @@ impl<'a> MaschineHandler for MHandler<'a> {
     }
 
     fn pad_released(&mut self, maschine: &mut dyn Maschine, pad_idx: usize) {
-        let midi_note = maschine.get_midi_note_base() + PAD_NOTE_MAP[pad_idx];
-        let msg = Message::NoteOff(Ch1, midi_note, 0);
+        let midi_note = PAD_NOTE_MAP[pad_idx];
+        let msg = Message::NoteOff(Ch16, midi_note, 0);
         self.seq_port.send_message(&msg).unwrap();
         self.seq_handle.drain_output();
 
@@ -406,7 +406,7 @@ fn main() {
         seq_port: &seq_port,
         seq_handle: &seq_handle,
 
-        pressure_shape: PressureShape::Exponential(0.4),
+        pressure_shape: PressureShape::Exponential(1.6),
         send_aftertouch: false,
 
         osc_socket: &osc_socket,
